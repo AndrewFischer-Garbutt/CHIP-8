@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 
-import pygame
+from window import window
 
 from random import randint
 
@@ -27,6 +27,15 @@ class chip8:
                 self.inst = -1
 
                 self.print_memory = False
+
+                self.WINDOW_HIGHT = 32
+                self.WINDOW_WIDTH = 64
+                self.PIXEL_SIZE = 10
+                self.DRAW_COLOR = (0,0,0)
+
+                wind = window(self.PIXEL_SIZE * self.WINDOW_HIGHT,
+                              self.PIXEL_SIZE * self.WINDOW_WIDTH,
+                              self.DRAW_COLOR)
 
 
                 self.lookup_special_ops = {
