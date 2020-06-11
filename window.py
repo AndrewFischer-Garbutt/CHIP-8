@@ -30,7 +30,6 @@ class window:
                                self.DRAW_WIDTH,
                                self.DRAW_HIGHT 
                             )
-
                     if self.debug:
                         print(params)
                     pygame.draw.rect(self.display, self.DRAW_COLOR, params)
@@ -62,10 +61,4 @@ if __name__ == '__main__':
 
         w.clear_screen()
 
-        w.draw_sprite(200, 50, ONE)
-        running = True
-        while running:
-          for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-              running = False
-
+        w.draw_sprite(0, 0, ONE)
