@@ -25,8 +25,8 @@ class window:
         for i in range(len(pixel_data)):
             for j in range(8):
                 if (pixel_data[i] << j) & 0x80:
-                    params = ( x_pos + self.DRAW_WIDTH * j,
-                               y_pos + self.DRAW_HIGHT * i,
+                    params = ( self.DRAW_WIDTH * (x_pos + j),
+                               self.DRAW_WIDTH * (y_pos + i),
                                self.DRAW_WIDTH,
                                self.DRAW_HIGHT 
                             )

@@ -28,7 +28,7 @@ class chip8:
 
         self.inst = -1
 
-        self.print_memory = True
+        self.print_memory = False
 
         self.WINDOW_HIGHT = 32
         self.WINDOW_WIDTH = 64
@@ -91,7 +91,7 @@ class chip8:
                 0xF065 : self.fill_registers_with_memory_starting_at_i
                 }
 
-        self.debug = True
+        self.debug = False
 
     def init_memory(self):
         fonts = [
@@ -146,14 +146,15 @@ class chip8:
         self.wind.clear_screen()
 
     def return_from_subroutine(self):
-        pass
+        self.stack_pointer -= 1
+        self.pc = self.stack[self.stack_pointer]
 
     def jump_to_address_nnn(self):
         self.pc = (self.instr & 0x0fff) - 2
 
     def execute_subroutine_at_nnn(self):
         # I have questions about how this should
-        # by implemented
+        # be implemented
         self.stack[self.stack_pointer] = self.pc
         self.stack_pointer += 1
         self.pc = (self.instr & 0x0fff) - 2
@@ -261,15 +262,20 @@ class chip8:
 
     def set_vx_to_random_number_with_mask_nn(self):
         mask = self.instr & 0x00ff
-
         self.reg[(self.instr & 0x0f00) >> 8] = mask & randint(0,0xff)
 
 
     def draw_sprite_at_position_vx_vy(self):
+        nbytes = self.instr & 0x000f
         vx = self.reg[(self.instr & 0x0f00) >> 8]
         vy = self.reg[(self.instr & 0x00f0) >> 4]
-        nbytes = self.instr & 0x000f
-        self.wind.draw_sprite(vx, vy, self.mem[self.I:self.I + nbytes * 8])
+        if self.debug:
+            print("Drawing a {0} byte sprite at address 0x{1:X}: ".format(nbytes, self.I))
+            print("At location ({0}, {1})".format(vx, vy))
+
+        self.dump_hex(self.mem[self.I:self.I + nbytes])
+
+        self.wind.draw_sprite(vx, vy, self.mem[self.I:self.I + nbytes])
 
     def skip_on_key_pressed(self):
         pass
@@ -282,9 +288,6 @@ class chip8:
 
     def wait_for_keypress_store_result_in_vx(self):
         pass
-
-    def wait_for_keypress_store_result_in_vx(self):
-        vx = self.reg[(self.instr & 0x0f00) >> 8]
 
     def set_delay_timer_to_vx(self):
         vx = self.reg[(self.instr & 0x0f00) >> 8]
@@ -308,14 +311,17 @@ class chip8:
         self.mem[self.I + 2] = vx % 10
 
     def store_v0_to_vx_in_memory(self):
-        pass
+        x = (self.instr & 0x0f00) >> 8
+        self.mem[self.I:self.I + x] = self.reg[0:x+1]
 
     def fill_registers_with_memory_starting_at_i(self):
-        pass
+        x = (self.instr & 0x0f00) >> 8
+        self.reg[0:x+1] = self.mem[self.I:self.I + x+1]
 
     def run_instruction(self):
-        print(self.lookup_vx_vy.keys())
-        print("Excuting {0}".format(hex(self.instr)))
+        if self.debug:
+            print(self.lookup_vx_vy.keys())
+            print("Excuting {0}".format(hex(self.instr)))
 
         if self.instr in self.lookup_special_ops.keys():
             func = self.lookup_special_ops[self.instr]
@@ -329,7 +335,7 @@ class chip8:
             func = self.lookup_vx[self.instr & 0xf0ff]
 
         if self.debug:
-            print("Running {0}".format(func))
+            print("Running {0}".format(func.__name__))
         func()
 
     def emulationCycles(self):
@@ -345,8 +351,6 @@ class chip8:
                 if event.type == pygame.QUIT:
                     running = False
 
-            time.sleep(0.4)
-
             # Decode
             self.run_instruction()
 
@@ -357,5 +361,3 @@ if __name__ == '__main__':
     ch = chip8()
     ch.init_memory()
     ch.emulationCycles()
-
-
